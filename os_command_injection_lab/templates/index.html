@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>OS Command Injection Lab</title>
+  <style>
+    :root { color-scheme: light; --ink: #1e293b; --muted: #64748b; --line: #dbe3ee; --bg: #f5f7fb; --red: #a32929; --green: #176b45; }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--ink); font: 16px/1.5 system-ui, -apple-system, Segoe UI, sans-serif; }
+    header { padding: 28px 20px; background: #172554; color: white; }
+    header .inner, main { max-width: 1100px; margin: 0 auto; }
+    h1 { margin: 0 0 5px; font-size: clamp(1.6rem, 4vw, 2.2rem); }
+    header p { margin: 0; color: #dbeafe; }
+    main { padding: 22px 16px 36px; }
+    .warning { border-left: 5px solid #d97706; background: #fff7ed; padding: 12px 14px; margin-bottom: 20px; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 440px), 1fr)); gap: 18px; align-items: start; }
+    .panel { background: white; border: 1px solid var(--line); border-radius: 12px; padding: 20px; box-shadow: 0 4px 16px #0f172a0a; }
+    h2 { font-size: 1.2rem; margin: 0 0 8px; }
+    .tag { display: inline-block; font-size: .76rem; font-weight: 700; letter-spacing: .03em; padding: 3px 8px; border-radius: 999px; margin-bottom: 8px; }
+    .bad { color: var(--red); background: #fee2e2; }
+    .good { color: var(--green); background: #dcfce7; }
+    p { margin: 8px 0 14px; }
+    label { display: block; font-weight: 650; margin-bottom: 6px; }
+    input { width: 100%; padding: 10px 11px; font: inherit; border: 1px solid #94a3b8; border-radius: 7px; }
+    button { margin-top: 10px; background: #1d4ed8; color: white; padding: 10px 14px; border: 0; border-radius: 7px; font: inherit; font-weight: 650; cursor: pointer; }
+    button:focus-visible, input:focus-visible { outline: 3px solid #93c5fd; outline-offset: 2px; }
+    .hint { color: var(--muted); font-size: .92rem; }
+    pre { background: #0f172a; color: #e2e8f0; padding: 13px; border-radius: 8px; white-space: pre-wrap; overflow-wrap: anywhere; min-height: 54px; max-height: 340px; overflow: auto; }
+    .status { font-size: .88rem; color: var(--muted); }
+    .error { color: var(--red); background: #fff1f2; border: 1px solid #fecdd3; border-radius: 8px; padding: 10px 12px; margin-bottom: 16px; }
+    code { background: #eef2ff; padding: 2px 5px; border-radius: 4px; }
+    footer { margin-top: 20px; color: var(--muted); font-size: .9rem; }
+  </style>
+</head>
+<body>
+<header>
+  <div class="inner">
+    <h1>OS Command Injection Lab</h1>
+    <p>Cyber Security assignment · In-band variant · vulnerable vs. mitigated implementation</p>
+  </div>
+</header>
+<main>
+  <div class="warning"><strong>Local lab only:</strong> this application intentionally contains a command-injection flaw. It binds to <code>127.0.0.1</code>. Do not expose it to a LAN, public server, or hosting provider. Use only the supplied harmless demonstration payload.</div>
+  {% if error %}<div class="error" role="alert">{{ error }}</div>{% endif %}
+  <div class="grid">
+    <section class="panel">
+      <span class="tag bad">INTENTIONALLY VULNERABLE</span>
+      <h2>1. Vulnerable implementation</h2>
+      <p>The target is concatenated into a shell command string. Shell operators may be interpreted as syntax.</p>
+      <form action="/run/vulnerable" method="post">
+        <label for="vulnerable-target">Host / target</label>
+        <input id="vulnerable-target" name="target" value="{{ vulnerable_input }}" maxlength="128" autocomplete="off" required>
+        <p class="hint">Try a normal target first, then the demonstration payload described in the README.</p>
+        <button type="submit">Run vulnerable check</button>
+      </form>
+      {% if vulnerable_output is not none %}
+        <h3>Command output</h3>
+        <pre>{{ vulnerable_output }}</pre>
+        {% if vulnerable_status is not none %}<div class="status">Exit status: {{ vulnerable_status }}</div>{% endif %}
+      {% endif %}
+    </section>
+
+    <section class="panel">
+      <span class="tag good">MITIGATED</span>
+      <h2>2. Secure implementation</h2>
+      <p>The same operation is executed with an argument vector and <code>shell=False</code>. The target is one literal argument.</p>
+      <form action="/run/secure" method="post">
+        <label for="secure-target">Host / target</label>
+        <input id="secure-target" name="target" value="{{ secure_input }}" maxlength="128" autocomplete="off" required>
+        <p class="hint">Submit the exact same payload here. It should be treated as a target value, not a second command.</p>
+        <button type="submit">Run secure check</button>
+      </form>
+      {% if secure_output is not none %}
+        <h3>Command output</h3>
+        <pre>{{ secure_output }}</pre>
+        {% if secure_status is not none %}<div class="status">Exit status: {{ secure_status }}</div>{% endif %}
+      {% endif %}
+    </section>
+  </div>
+  <footer>For a classroom demonstration, capture the vulnerable result and then the secure result using the same input. Output is HTML-escaped by the template engine.</footer>
+</main>
+</body>
+</html>
