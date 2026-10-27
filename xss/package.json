@@ -1,0 +1,10 @@
+{
+  "name": "xss-demo",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Educational demo of Reflected and Stored XSS, with mitigation toggle. Zero dependencies - built for IIIT Allahabad IT-30001 Cyber Security assignment.",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  }
+}
